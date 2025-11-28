@@ -1,19 +1,14 @@
+use crate::{app::App, list::create_list};
 use ratatui::{
     Frame,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Style},
     text::{Line, Text},
-    widgets::{
-        Block, Borders, List, Padding, Paragraph,
-    },
+    widgets::{Block, Borders, List, Padding, Paragraph},
 };
 use tui_textarea::TextArea;
-use crate::{
-    app::App,
-    list::create_list
-};
 
-pub fn create_editor<'a>(frame: &mut Frame, layout : Rect, area : &TextArea){
+pub fn create_editor<'a>(frame: &mut Frame, layout: Rect, area: &TextArea) {
     let editor_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
@@ -22,7 +17,7 @@ pub fn create_editor<'a>(frame: &mut Frame, layout : Rect, area : &TextArea){
             Constraint::Percentage(30),
         ])
         .split(layout);
-    
+
     let editor_header_layout = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([Constraint::Percentage(15), Constraint::Percentage(85)])
@@ -60,39 +55,61 @@ pub fn create_editor_area<'a>(app: &App) -> TextArea<'a> {
 }
 
 fn create_editor_header<'a>() -> (Paragraph<'a>, Paragraph<'a>) {
-    let project = create_paragraph("Project".to_string(), "Name".to_string(), Color::Gray, Borders::TOP, Alignment::Center);
-    let name = create_paragraph("Request".to_string(), "Name".to_string(), Color::Gray, Borders::TOP | Borders::LEFT, Alignment::Left);
+    let project = create_paragraph(
+        "Project".to_string(),
+        "Name".to_string(),
+        Color::Gray,
+        Borders::TOP,
+        Alignment::Center,
+    );
+    let name = create_paragraph(
+        "Request".to_string(),
+        "Name".to_string(),
+        Color::Gray,
+        Borders::TOP | Borders::LEFT,
+        Alignment::Left,
+    );
 
     (project, name)
 }
 
-fn create_paragraph<'a>(titel : String, content : String, color : Color, border : Borders, content_aligment : Alignment) -> Paragraph<'a> {
-    let project = Paragraph::new(Text::styled(
-        content,
-        Style::default().fg(color),
-    ))
-    .alignment(content_aligment)
-    .block(
-        Block::default()
-            .borders(border)
-            .style(Style::default())
-            .title(titel)
-            .title_alignment(Alignment::Center),
-    );
+fn create_paragraph<'a>(
+    titel: String,
+    content: String,
+    color: Color,
+    border: Borders,
+    content_aligment: Alignment,
+) -> Paragraph<'a> {
+    let project = Paragraph::new(Text::styled(content, Style::default().fg(color)))
+        .alignment(content_aligment)
+        .block(
+            Block::default()
+                .borders(border)
+                .style(Style::default())
+                .title(titel)
+                .title_alignment(Alignment::Center),
+        );
     project
 }
 
 fn create_editor_history_list<'a>() -> List<'a> {
     let shortcuts = vec![
-         format!(
+        format!(
             "{} - {} - [{}]",
             "[200]", "https://localhost:8080/test", "HH:MM:SS / DD.MM.YYYY"
         ),
         format!(
             "{} - {} - [{}]",
             "[200]", "https://localhost:8080/test", "HH:MM:SS / DD.MM.YYYY"
-        )];
+        ),
+    ];
 
-    let list = create_list("Request History".to_string(), shortcuts, Color::LightGreen, Color::Gray, Borders::TOP | Borders::BOTTOM);
+    let list = create_list(
+        "Request History".to_string(),
+        shortcuts,
+        Color::LightGreen,
+        Color::Gray,
+        Borders::TOP | Borders::BOTTOM,
+    );
     list
 }

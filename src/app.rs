@@ -1,13 +1,12 @@
-use serde_json::{Map, Value};
 use crate::example_data::get_example_data;
+use serde_json::{Map, Value};
 
 #[derive(Debug)]
 pub enum CurrentScreen {
-    Main
+    Main,
 }
 #[derive(Debug)]
-pub enum CurrentlyEditing {
-}
+pub enum CurrentlyEditing {}
 
 pub struct App {
     pub value: Map<String, Value>,
@@ -15,8 +14,8 @@ pub struct App {
     pub currently_editing: Option<CurrentlyEditing>,
 }
 
-impl App{
-    pub fn new() -> App{
+impl App {
+    pub fn new() -> App {
         App {
             value: get_example_data(),
             current_screen: CurrentScreen::Main,

@@ -1,4 +1,3 @@
-use std::{error::Error, io};
 use ratatui::{
     Terminal,
     backend::{Backend, CrosstermBackend},
@@ -8,20 +7,16 @@ use ratatui::{
         terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
     },
 };
+use std::{error::Error, io};
 
-mod example_data;
 mod editor;
+mod example_data;
 mod list;
 
 mod app;
 mod ui;
 
-use crate::{
-    app::App,
-    ui::ui,
-};
-
-
+use crate::{app::App, ui::ui};
 
 fn main() -> Result<(), Box<dyn Error>> {
     // setup terminal
@@ -64,8 +59,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
             if key.kind == event::KeyEventKind::Release {
                 // Skip events that are not KeyEventKind::Press
                 continue;
-            }
-            else {
+            } else {
                 editor_area.input(key);
             }
         }
