@@ -7,15 +7,13 @@ use ratatui::{
         Block, Borders, List, Padding, Paragraph,
     },
 };
-use serde_json::{Map, Value};
 use tui_textarea::TextArea;
 use crate::{
-    app::{App, CurrentScreen, CurrentlyEditing},
-    ui::ui,
+    app::App,
     list::create_list
 };
 
-pub fn create_editor<'a>(frame: &mut Frame, layout : Rect, app: &App, area : &TextArea){
+pub fn create_editor<'a>(frame: &mut Frame, layout : Rect, area : &TextArea){
     let editor_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints([

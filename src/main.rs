@@ -3,7 +3,7 @@ use ratatui::{
     Terminal,
     backend::{Backend, CrosstermBackend},
     crossterm::{
-        event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind},
+        event::{self, DisableMouseCapture, EnableMouseCapture, Event},
         execute,
         terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
     },
@@ -17,7 +17,7 @@ mod app;
 mod ui;
 
 use crate::{
-    app::{App, CurrentScreen, CurrentlyEditing},
+    app::App,
     ui::ui,
 };
 

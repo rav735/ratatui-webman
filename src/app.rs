@@ -1,17 +1,12 @@
 use serde_json::{Map, Value};
-use tui_textarea::TextArea;
 use crate::example_data::get_example_data;
 
 #[derive(Debug)]
 pub enum CurrentScreen {
-    Main,
-    Editing,
-    Exiting,
+    Main
 }
 #[derive(Debug)]
 pub enum CurrentlyEditing {
-    Key,
-    Value,
 }
 
 pub struct App {

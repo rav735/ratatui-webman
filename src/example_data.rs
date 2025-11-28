@@ -1,17 +1,6 @@
 
 use serde_json::{Map, Value, json};
 
-
-#[derive(Default, serde::Serialize)]
-pub struct ExampleObject {
-    pub id: i64,
-    pub name: String,
-    pub data: i16,
-    pub name1: String,
-    pub name2: String,
-    pub name3: String,
-}
-
 pub fn get_example_data() -> Map<String, Value>
 {
     let example_json = json!({ "name"   : "John Smith",

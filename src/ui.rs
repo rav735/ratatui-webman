@@ -45,7 +45,7 @@ pub fn ui(frame: &mut Frame, app: &App, area: &TextArea) {
     frame.render_widget(list, layout[0]);
 
 
-    create_editor(frame, layout[1], app, area);
+    create_editor(frame, layout[1], area);
 
     let hotkey_list = create_hotkey_list();
     frame.render_widget(hotkey_list, layout[2]);
