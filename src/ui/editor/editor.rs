@@ -1,11 +1,14 @@
-use crate::{app::App, ui::editor::{header::create_editor_header, history::create_editor_history_list}};
+use crate::{
+    app::App,
+    ui::editor::{header::create_editor_header, history::create_editor_history_list},
+};
 use ratatui::{
     Frame,
     layout::{Constraint, Direction, Layout, Rect},
 };
 use tui_textarea::TextArea;
 
-pub fn create_editor<'a>(app : &App, frame: &mut Frame, layout: Rect, area: &TextArea) {
+pub fn create_editor<'a>(app: &App, frame: &mut Frame, layout: Rect, area: &TextArea) {
     let editor_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
@@ -27,6 +30,6 @@ pub fn create_editor<'a>(app : &App, frame: &mut Frame, layout: Rect, area: &Tex
     let editor_area = area;
     frame.render_widget(editor_area, editor_layout[1]);
 
-    let history_list = create_editor_history_list(app);
+    let history_list = create_editor_history_list();
     frame.render_widget(history_list, editor_layout[2]);
 }

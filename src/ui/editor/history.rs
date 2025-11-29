@@ -4,7 +4,7 @@ use ratatui::{
     widgets::{Borders, List},
 };
 
-pub fn create_editor_history_list<'a>(app: &App) -> List<'a> {
+pub fn create_editor_history_list<'a>() -> List<'a> {
     let shortcuts = vec![
         format!(
             "{} - {} - [{}]",
@@ -21,7 +21,7 @@ pub fn create_editor_history_list<'a>(app: &App) -> List<'a> {
         shortcuts,
         Color::LightGreen,
         Color::Gray,
-        Borders::TOP | Borders::BOTTOM
+        Borders::TOP | Borders::BOTTOM,
     );
     list
 }

@@ -16,7 +16,7 @@ pub struct App {
     pub value: Map<String, Value>,
     pub current_screen: CurrentScreen,
     pub currently_editing: CurrentlyEditing,
-    pub saved_list: SavedList<'static>
+    pub saved_list: SavedList<'static>,
 }
 
 impl App {
@@ -25,12 +25,11 @@ impl App {
             value: get_example_data(),
             current_screen: CurrentScreen::Main,
             currently_editing: CurrentlyEditing::None,
-            saved_list: SavedList::default()
+            saved_list: SavedList::default(),
         }
     }
 
-    pub fn update_saved_list(&mut self)
-    {
+    pub fn update_saved_list(&mut self) {
         let shortcuts = vec![
             format!("app.current_screen : {:#?}", self.current_screen).to_string(),
             format!("app.currently_editing : {:#?}", self.currently_editing).to_string(),

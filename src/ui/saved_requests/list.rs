@@ -1,19 +1,19 @@
-use std::iter::Map;
-
-use crate::{app::App, utils::create_list};
+use crate::utils::create_list;
 use ratatui::{
-    crossterm::event::{KeyCode, KeyEvent, KeyEventKind}, style::{Color, Style}, widgets::{Borders, List}
+    crossterm::event::{KeyCode, KeyEvent, KeyEventKind},
+    style::{Color, Style},
+    widgets::{Borders, List},
 };
 
 #[derive(Default)]
 pub struct SavedList<'a> {
-    pub values : Vec<String>,
-    styles : Vec<Style>,
-    selected : i32,
-    pub ui_element : List<'a>
+    pub values: Vec<String>,
+    styles: Vec<Style>,
+    selected: i32,
+    pub ui_element: List<'a>,
 }
 
-impl SavedList<'_>{
+impl SavedList<'_> {
     pub fn handle_key(&mut self, key: KeyEvent) {
         if key.kind != KeyEventKind::Press {
             return;
@@ -50,14 +50,13 @@ impl SavedList<'_>{
         self.selected = self.values.len() as i32;
     }
 
-    pub fn create_saved_list<'a>(&mut self) -> List<'a>
-    {
+    pub fn create_saved_list<'a>(&mut self) -> List<'a> {
         let list = create_list(
             " [1] - Saved Requests ".to_string(),
             self.values.clone(),
             Color::DarkGray,
             Color::Gray,
-            Borders::ALL
+            Borders::ALL,
         );
         list
     }
