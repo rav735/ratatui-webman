@@ -4,6 +4,33 @@ use ratatui::{
     widgets::{Block, Borders, List, ListItem},
 };
 
+pub fn create_list_with_styles(
+    title: String,
+    items: Vec<String>,
+    item_styles: Vec<Style>,
+    border_color: Color,
+    borderflags: Borders,
+) -> List<'static> {
+    let mut list_items = Vec::<ListItem>::new();
+
+    for i in 0..items.len() {
+        list_items.push(ListItem::new(Line::from(Span::styled(
+            items[i].to_string(),
+            item_styles[i],
+        ))));
+    }
+
+    let list_block = Block::default()
+        .borders(borderflags)
+        .border_style(border_color)
+        .style(Style::default())
+        .title(Line::from(title).centered());
+
+    let list = List::new(list_items).block(list_block);
+
+    list
+}
+
 pub fn create_list(
     title: String,
     items: Vec<String>,

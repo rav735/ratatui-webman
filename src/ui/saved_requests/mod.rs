@@ -1,3 +1,3 @@
 mod list;
 
-pub use list::SavedList;
+pub use list::SavedRequestList;

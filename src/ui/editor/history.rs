@@ -1,4 +1,4 @@
-use crate::{app::App, utils::create_list};
+use crate::utils::create_list;
 use ratatui::{
     style::Color,
     widgets::{Borders, List},
