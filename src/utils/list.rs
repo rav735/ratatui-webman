@@ -1,7 +1,7 @@
 use ratatui::{
     style::{Color, Style},
     text::{Line, Span},
-    widgets::{Block, Borders, List, ListItem},
+    widgets::{Block, BorderType, Borders, List, ListItem},
 };
 
 pub fn create_list_with_styles(
@@ -23,6 +23,7 @@ pub fn create_list_with_styles(
     let list_block = Block::default()
         .borders(borderflags)
         .border_style(border_color)
+        .border_type(BorderType::Rounded)
         .style(Style::default())
         .title(Line::from(title).centered());
 
@@ -46,6 +47,7 @@ pub fn create_list(
 
     let list_block = Block::default()
         .borders(borderflags)
+        .border_type(BorderType::Rounded)
         .border_style(bg_color)
         .style(Style::default())
         .title(Line::from(title).centered());

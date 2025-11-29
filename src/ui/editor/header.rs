@@ -2,7 +2,7 @@ use ratatui::{
     layout::Alignment,
     style::{Color, Style},
     text::Text,
-    widgets::{Block, Borders, Paragraph},
+    widgets::{Block, BorderType, Borders, Paragraph},
 };
 
 pub fn create_editor_header<'a>() -> (Paragraph<'a>, Paragraph<'a>) {
@@ -17,7 +17,7 @@ pub fn create_editor_header<'a>() -> (Paragraph<'a>, Paragraph<'a>) {
         " Request ".to_string(),
         "Name".to_string(),
         Color::Gray,
-        Borders::TOP | Borders::LEFT,
+        Borders::TOP | Borders::LEFT | Borders::RIGHT,
         Alignment::Left,
     );
 
@@ -36,6 +36,7 @@ fn create_paragraph<'a>(
         .block(
             Block::default()
                 .borders(border)
+                .border_type(BorderType::Rounded)
                 .style(Style::default())
                 .title(titel)
                 .title_alignment(Alignment::Center),

@@ -12,7 +12,7 @@ pub enum CurrentScreen {
     Main,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum CurrentlyInteracting {
     None,
     SavedRequests,
@@ -31,7 +31,7 @@ impl App {
         App {
             value: get_example_data(),
             current_screen: CurrentScreen::Main,
-            currently_interacting: CurrentlyInteracting::None,
+            currently_interacting: CurrentlyInteracting::SavedRequests,
             saved_list: SavedRequestList {
                 values: get_saved_requests(),
                 ui_element: List::default(),

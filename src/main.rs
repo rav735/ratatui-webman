@@ -18,10 +18,9 @@ mod ui;
 mod utils;
 
 use crate::{
-    app::{App, CurrentlyInteracting}, file::update_saved_request, ui::{
-        editor::{create_text_area, get_editor_style},
-        ui::ui,
-    }
+    app::{App, CurrentlyInteracting},
+    file::update_saved_request,
+    ui::{editor::EditorTextArea, ui::ui},
 };
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -56,16 +55,15 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<bool> {
-    let mut editor_area = create_text_area(app);
+    let mut editor_area = EditorTextArea::create_new(&app.saved_list.selected);
     let mut last_selected: String = app.saved_list.selected.clone();
+    app.saved_list.enable();
     loop {
-        editor_area.set_style(get_editor_style(app, &editor_area));
-        editor_area.set_line_number_style(get_editor_style(app, &editor_area));
-
-        terminal.draw(|f| ui(f, app, &editor_area))?;
+        editor_area.update_text_style(app.currently_interacting.clone());
+        terminal.draw(|f| ui(f, app, &editor_area.area))?;
 
         if last_selected != app.saved_list.selected.clone() {
-            editor_area = create_text_area(app);
+            editor_area = EditorTextArea::create_new(&app.saved_list.selected);
         }
 
         if let Event::Key(key) = event::read()? {
@@ -74,7 +72,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
                 continue;
             }
 
-            if app.currently_interacting != CurrentlyInteracting::SavedRequests
+            if app.currently_interacting == CurrentlyInteracting::None
                 && key.code == event::KeyCode::Char('1')
             {
                 app.currently_interacting = CurrentlyInteracting::SavedRequests;
@@ -84,14 +82,17 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
 
             if app.currently_interacting != CurrentlyInteracting::RequestBody
                 && key.code == event::KeyCode::Char('e')
+                && app.currently_interacting == CurrentlyInteracting::SavedRequests
             {
                 app.currently_interacting = CurrentlyInteracting::RequestBody;
+                app.saved_list.disable();
                 continue;
             }
 
             if key.code == event::KeyCode::Esc {
                 if app.currently_interacting == CurrentlyInteracting::RequestBody {
                     app.currently_interacting = CurrentlyInteracting::SavedRequests;
+                    app.saved_list.enable();
                     continue;
                 } else if app.currently_interacting == CurrentlyInteracting::SavedRequests {
                     app.currently_interacting = CurrentlyInteracting::None;
@@ -101,13 +102,15 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
                     return Ok(false);
                 }
             } else if app.currently_interacting == CurrentlyInteracting::SavedRequests {
+                app.saved_list.enable();
                 app.saved_list.handle_key(key);
             } else if app.currently_interacting == CurrentlyInteracting::RequestBody {
-                if key.code == event::KeyCode::Char('s') && key.modifiers.contains(KeyModifiers::CONTROL)
+                if key.code == event::KeyCode::Char('s')
+                    && key.modifiers.contains(KeyModifiers::CONTROL)
                 {
-                    update_saved_request(&last_selected, editor_area.clone().into_lines());
+                    update_saved_request(&last_selected, editor_area.get_current_content());
                 }
-                editor_area.input(key);
+                editor_area.area.input(key);
             } else {
             }
             last_selected = app.saved_list.selected.clone();

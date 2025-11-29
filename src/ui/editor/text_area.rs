@@ -1,22 +1,30 @@
 use ratatui::{
     style::{Color, Style},
     text::Line,
-    widgets::{Block, Borders, Padding},
+    widgets::{Block, BorderType, Borders, Padding},
 };
 use tui_textarea::TextArea;
 
 use crate::{
-    app::{App, CurrentlyInteracting},
+    app::CurrentlyInteracting,
     file::read_saved_request,
 };
 
-pub fn create_text_area<'a>(app: &App) -> TextArea<'a> {
-    let style = Style::default().bg(Color::DarkGray);
-    let mut textarea = TextArea::from(read_saved_request(app.saved_list.selected.clone()).lines());
-    textarea.set_line_number_style(style);
-    textarea.set_block(
-        Block::default()
-            .borders(Borders::TOP)
+pub struct EditorTextArea<'a> {
+    pub area: TextArea<'a>,
+    style_enabled: Style,
+    style_disabled: Style,
+    style_line_number_enabled: Style,
+    style_line_number_disabled: Style,
+    style_cursor_body_enabled: Style,
+    style_cursor_body_disabled: Style,
+}
+
+impl<'a> EditorTextArea<'a> {
+    pub fn create_new(path: &String) -> EditorTextArea<'a> {
+        let block = Block::default()
+            .borders(Borders::TOP | Borders::RIGHT)
+            .border_type(BorderType::Rounded)
             .style(Style::default())
             .title(Line::from(" Request Body ").centered())
             .padding(Padding {
@@ -24,17 +32,46 @@ pub fn create_text_area<'a>(app: &App) -> TextArea<'a> {
                 right: 0,
                 top: 1,
                 bottom: 1,
-            }),
-    );
-    textarea
-}
+            });
 
-pub fn get_editor_style<'a>(app: &App, area: &TextArea<'a>) -> Style {
-    let mut style = area.style();
-    if app.currently_interacting == CurrentlyInteracting::RequestBody {
-        style = style.fg(Color::Gray);
-    } else {
-        style = style.fg(Color::DarkGray);
+        let mut a = TextArea::from(read_saved_request(path.to_string()).lines());
+        a.set_block(block);
+
+        let res = EditorTextArea {
+            area: a,
+            style_enabled: Style::default().fg(Color::Gray),
+            style_line_number_enabled: Style::default()
+                .fg(Color::Gray),
+            style_cursor_body_enabled: Style::default()
+                .fg(Color::LightBlue),
+
+            style_disabled: Style::default().fg(Color::DarkGray),
+            style_line_number_disabled: Style::default()
+                .fg(Color::DarkGray),
+
+            style_cursor_body_disabled: Style::default()
+                .fg(Color::DarkGray),
+        };
+        res
     }
-    style
+
+    pub fn update_text_style(&mut self, state: CurrentlyInteracting) {
+        if state == CurrentlyInteracting::RequestBody {
+            self.area.set_style(self.style_enabled);
+            self.area
+                .set_line_number_style(self.style_line_number_enabled);
+            self.area
+                .set_cursor_line_style(self.style_cursor_body_enabled);
+        } else {
+            self.area.set_style(self.style_disabled);
+            self.area
+                .set_line_number_style(self.style_line_number_disabled);
+            self.area
+                .set_cursor_line_style(self.style_cursor_body_disabled);
+        }
+    }
+
+    pub fn get_current_content(&mut self) -> Vec<String>{
+        return self.area.clone().into_lines();
+    }
 }

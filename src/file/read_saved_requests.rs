@@ -42,10 +42,10 @@ pub fn read_saved_request(name: String) -> String {
     buffer
 }
 
-pub fn update_saved_request(name: &String, content: Vec<String>){
+pub fn update_saved_request(name: &String, content: Vec<String>) {
     let path = SAVED_REQUEST_PATH.to_string() + name;
     let mut buffer = BufWriter::new(File::create(path).unwrap());
-    
+
     for line in content {
         Some(buffer.write_all(line.as_bytes()));
         Some(buffer.write(b"\n"));

@@ -21,7 +21,7 @@ pub fn create_editor_history_list<'a>() -> List<'a> {
         shortcuts,
         Color::LightGreen,
         Color::Gray,
-        Borders::TOP | Borders::BOTTOM,
+        Borders::TOP | Borders::BOTTOM | Borders::RIGHT,
     );
     list
 }

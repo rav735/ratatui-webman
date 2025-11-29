@@ -15,16 +15,16 @@ pub fn ui(frame: &mut Frame, app: &mut App, area: &TextArea) {
         .direction(Direction::Horizontal)
         .constraints([
             Constraint::Length(50),
-            Constraint::Percentage(70),
             Constraint::Length(30),
+            Constraint::Percentage(70),
         ])
         .split(frame.area());
 
     app.update_saved_list();
     frame.render_widget(app.saved_list.ui_element.clone(), layout[0]);
 
-    create_editor(frame, layout[1], area);
+    create_editor(frame, layout[2], area);
 
     let hotkey_list = create_hotkey_list();
-    frame.render_widget(hotkey_list, layout[2]);
+    frame.render_widget(hotkey_list, layout[1]);
 }
