@@ -1,4 +1,4 @@
-use crate::example_data::get_example_data;
+use crate::utils::get_example_data;
 use serde_json::{Map, Value};
 
 #[derive(Debug)]

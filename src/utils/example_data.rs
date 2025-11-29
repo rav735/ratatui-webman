@@ -13,8 +13,17 @@ pub fn get_example_data() -> Map<String, Value> {
                 "address" : "123 Maple Street",
                 "city" : "Pretendville",
                 "state" : "NY",
+                "zip"   : "12345",
+                "city" : "Pretendville",
+                "state" : "NY",
+                "zip"   : "12345" },
+    "billTo" : { "name" : "John Smith",
+                "address" : "123 Maple Street",
+                "city" : "Pretendville",
+                "state" : "NY",
                 "zip"   : "12345" }
     })
-    .as_object().cloned()
+    .as_object()
+    .cloned()
     .unwrap()
 }

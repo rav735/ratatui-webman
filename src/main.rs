@@ -9,14 +9,17 @@ use ratatui::{
 };
 use std::{error::Error, io};
 
-mod editor;
-mod example_data;
-mod list;
-
+// General
 mod app;
 mod ui;
 
-use crate::{app::App, ui::ui};
+//  UI - Elements
+mod utils;
+
+use crate::{
+    app::App,
+    ui::{editor::create_text_area, ui::ui},
+};
 
 fn main() -> Result<(), Box<dyn Error>> {
     // setup terminal
@@ -51,7 +54,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<bool> {
-    let mut editor_area = editor::create_editor_area(app);
+    let mut editor_area = create_text_area(app);
     loop {
         terminal.draw(|f| ui(f, app, &editor_area))?;
 
@@ -59,6 +62,9 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
             if key.kind == event::KeyEventKind::Release {
                 // Skip events that are not KeyEventKind::Press
                 continue;
+            }
+            else if key.code == event::KeyCode::Esc {
+                return Ok(false);
             } else {
                 editor_area.input(key);
             }
