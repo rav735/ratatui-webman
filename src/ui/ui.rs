@@ -7,8 +7,6 @@ use tui_textarea::TextArea;
 // General
 use crate::app::App;
 
-// Editor Ui - Elements
-use crate::file::read_saved_request;
 use crate::ui::{editor::create_editor, hotkeys::create_hotkey_list};
 
 pub fn ui(frame: &mut Frame, app: &mut App, area: &TextArea) {
@@ -22,7 +20,6 @@ pub fn ui(frame: &mut Frame, app: &mut App, area: &TextArea) {
         ])
         .split(frame.area());
 
-    // area. = read_saved_request(app.saved_list.selected.clone());
     app.update_saved_list();
     frame.render_widget(app.saved_list.ui_element.clone(), layout[0]);
 

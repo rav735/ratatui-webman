@@ -8,7 +8,6 @@ use ratatui::{
     },
 };
 use std::{error::Error, io};
-use tui_textarea::TextArea;
 
 // General
 mod app;

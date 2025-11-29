@@ -2,7 +2,7 @@ use crate::utils::create_list_with_styles;
 use ratatui::{
     crossterm::event::{KeyCode, KeyEvent, KeyEventKind},
     style::{Color, Style},
-    widgets::{Borders, List, Paragraph},
+    widgets::{Borders, List},
 };
 
 #[derive(Default)]
