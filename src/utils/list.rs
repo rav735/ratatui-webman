@@ -9,7 +9,7 @@ pub fn create_list(
     items: Vec<String>,
     color: Color,
     bg_color: Color,
-    borderflags: Borders,
+    borderflags: Borders
 ) -> List<'static> {
     let mut list_items = Vec::<ListItem>::new();
 

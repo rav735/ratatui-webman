@@ -17,8 +17,11 @@ mod ui;
 mod utils;
 
 use crate::{
-    app::App,
-    ui::{editor::create_text_area, ui::ui},
+    app::{App, CurrentlyEditing},
+    ui::{
+        editor::{create_text_area, get_editor_style},
+        ui::ui,
+    },
 };
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -56,6 +59,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<bool> {
     let mut editor_area = create_text_area(app);
     loop {
+        editor_area.set_style(get_editor_style(app, &editor_area));
+        editor_area.set_line_number_style(get_editor_style(app, &editor_area));
+
         terminal.draw(|f| ui(f, app, &editor_area))?;
 
         if let Event::Key(key) = event::read()? {
@@ -63,10 +69,23 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
                 // Skip events that are not KeyEventKind::Press
                 continue;
             }
-            else if key.code == event::KeyCode::Esc {
-                return Ok(false);
-            } else {
+
+            if app.currently_editing != CurrentlyEditing::RequestBody
+                && key.code == event::KeyCode::Char('e')
+            {
+                app.currently_editing = CurrentlyEditing::RequestBody;
+                continue;
+            }
+
+            if key.code == event::KeyCode::Esc {
+                if app.currently_editing == CurrentlyEditing::RequestBody {
+                    app.currently_editing = CurrentlyEditing::None;
+                } else {
+                    return Ok(false);
+                }
+            } else if app.currently_editing == CurrentlyEditing::RequestBody {
                 editor_area.input(key);
+            } else {
             }
         }
     }

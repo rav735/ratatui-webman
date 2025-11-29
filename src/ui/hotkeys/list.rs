@@ -3,7 +3,7 @@ use ratatui::{
     widgets::{Borders, List},
 };
 
-use crate::utils::create_list;
+use crate::{utils::create_list};
 
 pub fn create_hotkey_list() -> List<'static> {
     let shortcuts = vec![
@@ -17,7 +17,7 @@ pub fn create_hotkey_list() -> List<'static> {
         shortcuts,
         Color::LightBlue,
         Color::Gray,
-        Borders::ALL,
+        Borders::ALL
     );
     list
 }

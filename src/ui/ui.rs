@@ -9,10 +9,10 @@ use crate::app::App;
 
 // Editor Ui - Elements
 use crate::ui::{
-    editor::create_editor, hotkeys::create_hotkey_list, saved_requests::create_saved_list,
+    editor::create_editor, hotkeys::create_hotkey_list, saved_requests::SavedList,
 };
 
-pub fn ui(frame: &mut Frame, app: &App, area: &TextArea) {
+pub fn ui(frame: &mut Frame, app: &mut App, area: &TextArea) {
     // Create the layout sections.
     let layout = Layout::default()
         .direction(Direction::Horizontal)
@@ -23,10 +23,10 @@ pub fn ui(frame: &mut Frame, app: &App, area: &TextArea) {
         ])
         .split(frame.area());
 
-    let list = create_saved_list(app);
-    frame.render_widget(list, layout[0]);
-
-    create_editor(frame, layout[1], area);
+    app.update_saved_list();
+    frame.render_widget(app.saved_list.ui_element.clone(), layout[0]);
+    
+    create_editor(app, frame, layout[1], area);
 
     let hotkey_list = create_hotkey_list();
     frame.render_widget(hotkey_list, layout[2]);

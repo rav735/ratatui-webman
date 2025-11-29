@@ -1,10 +1,10 @@
-use crate::utils::create_list;
+use crate::{app::App, utils::create_list};
 use ratatui::{
     style::Color,
     widgets::{Borders, List},
 };
 
-pub fn create_editor_history_list<'a>() -> List<'a> {
+pub fn create_editor_history_list<'a>(app: &App) -> List<'a> {
     let shortcuts = vec![
         format!(
             "{} - {} - [{}]",
@@ -21,7 +21,7 @@ pub fn create_editor_history_list<'a>() -> List<'a> {
         shortcuts,
         Color::LightGreen,
         Color::Gray,
-        Borders::TOP | Borders::BOTTOM,
+        Borders::TOP | Borders::BOTTOM
     );
     list
 }

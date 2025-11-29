@@ -5,7 +5,7 @@ use ratatui::{
 };
 use tui_textarea::TextArea;
 
-use crate::app::App;
+use crate::app::{App, CurrentlyEditing};
 
 pub fn create_text_area<'a>(app: &App) -> TextArea<'a> {
     let style = Style::default().bg(Color::DarkGray);
@@ -24,4 +24,14 @@ pub fn create_text_area<'a>(app: &App) -> TextArea<'a> {
             }),
     );
     textarea
+}
+
+pub fn get_editor_style<'a>(app: &App, area: &TextArea<'a>) -> Style {
+    let mut style = area.style();
+    if app.currently_editing == CurrentlyEditing::RequestBody {
+        style = style.fg(Color::Gray);
+    } else {
+        style = style.fg(Color::DarkGray);
+    }
+    style
 }
