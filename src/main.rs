@@ -7,7 +7,7 @@ use ratatui::{
         terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
     },
 };
-use std::{error::Error, fmt::format, io, ops::Add};
+use std::{error::Error, io};
 
 // General
 mod app;

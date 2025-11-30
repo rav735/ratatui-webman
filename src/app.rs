@@ -1,16 +1,12 @@
-use crate::{
-    file::get_saved_requests, ui::saved_requests::SavedRequestList, utils::get_example_data,
-};
-use ratatui::{
-    style::{Color, Style},
-    widgets::List,
-};
+use crate::
+    utils::get_example_data
+;
 use serde_json::{Map, Value};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum CurrentScreen {
     Main,
-    History,
+    // History,
 }
 
 // #[derive(Debug, PartialEq, Eq, Clone)]

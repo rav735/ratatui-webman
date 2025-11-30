@@ -1,4 +1,4 @@
-use std::{collections::HashMap, iter::Map};
+use std::collections::HashMap;
 
 use ratatui::{style::Color, widgets::{Borders, List}};
 

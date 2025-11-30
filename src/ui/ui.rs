@@ -6,7 +6,7 @@ use ratatui::{
 use tui_textarea::TextArea;
 
 // General
-use crate::{EditorState, ui::{debug::create_debuger_panel, editor::create_editor, hotkeys::create_hotkey_list}, utils::DebugValues};
+use crate::{ui::{editor::create_editor, hotkeys::create_hotkey_list}, utils::DebugValues};
 
 pub fn ui(frame: &mut Frame, request_list: &List, area: &TextArea, db : &DebugValues) {
     // Create the layout sections.
