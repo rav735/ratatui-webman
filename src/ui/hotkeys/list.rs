@@ -17,7 +17,7 @@ pub fn create_hotkey_list() -> List<'static> {
         shortcuts,
         Color::LightBlue,
         Color::Gray,
-        Borders::TOP  | Borders::RIGHT  | Borders::BOTTOM,
+        Borders::TOP | Borders::RIGHT | Borders::BOTTOM,
     );
     list
 }

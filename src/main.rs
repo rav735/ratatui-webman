@@ -7,7 +7,7 @@ use ratatui::{
         terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
     },
 };
-use std::{error::Error, io};
+use std::{error::Error, fmt::format, io, ops::Add};
 
 // General
 mod app;
@@ -18,10 +18,17 @@ mod ui;
 mod utils;
 
 use crate::{
-    app::{App, CurrentlyInteracting},
+    app::{App, CurrentScreen},
     file::update_saved_request,
-    ui::{editor::EditorTextArea, ui::ui},
+    ui::{editor::EditorTextArea, saved_requests::SavedRequestList, ui::ui}, utils::DebugValues,
 };
+
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub enum EditorState {
+    Unfocused,
+    Editing,
+    SelectingRequest,
+}
 
 fn main() -> Result<(), Box<dyn Error>> {
     // setup terminal
@@ -55,15 +62,30 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<bool> {
-    let mut editor_area = EditorTextArea::create_new(&app.saved_list.selected);
-    let mut last_selected: String = app.saved_list.selected.clone();
-    app.saved_list.enable();
-    loop {
-        editor_area.update_text_style(app.currently_interacting.clone());
-        terminal.draw(|f| ui(f, app, &editor_area.area))?;
+    let mut state: EditorState = EditorState::SelectingRequest;
+    let mut saved_list = SavedRequestList::create_new();
+    saved_list.update_list(&state);
+    let mut editor_area = EditorTextArea::create_new(&saved_list.selected);
 
-        if last_selected != app.saved_list.selected.clone() {
-            editor_area = EditorTextArea::create_new(&app.saved_list.selected);
+    let mut last_selected = saved_list.selected.clone();
+
+    let mut debug_values = DebugValues::create_new();
+    
+    saved_list.update_list(&state);
+    editor_area.update_text_style(&state);
+    debug_values.add("State".to_string(), format!("{state:?}"));
+    debug_values.add("Last".to_string(), last_selected.to_string());
+    debug_values.add("Selected".to_string(), saved_list.selected.to_string());
+    loop {
+
+        
+        terminal.draw(|f| ui(f, &saved_list.list, &editor_area.area, &debug_values))?;
+        if last_selected != saved_list.selected{
+            editor_area = EditorTextArea::create_new(&saved_list.selected);
+            editor_area.update_text_style(&state);
+            last_selected = saved_list.selected.clone();
+            debug_values.add("Last".to_string(), last_selected.to_string());
+            debug_values.add("Selected".to_string(), saved_list.selected.to_string());
         }
 
         if let Event::Key(key) = event::read()? {
@@ -72,48 +94,59 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
                 continue;
             }
 
-            if app.currently_interacting == CurrentlyInteracting::None
-                && key.code == event::KeyCode::Char('1')
-            {
-                app.currently_interacting = CurrentlyInteracting::SavedRequests;
-                app.saved_list.enable();
-                continue;
-            }
+            if app.current_screen == CurrentScreen::Main {
+                let mut state_change = false;
+                if state == EditorState::Unfocused && key.code == event::KeyCode::Char('1') {
+                    state = EditorState::SelectingRequest;
+                    state_change = true;
+                }
 
-            if app.currently_interacting != CurrentlyInteracting::RequestBody
-                && key.code == event::KeyCode::Char('e')
-                && app.currently_interacting == CurrentlyInteracting::SavedRequests
-            {
-                app.currently_interacting = CurrentlyInteracting::RequestBody;
-                app.saved_list.disable();
-                continue;
-            }
+                if state == EditorState::SelectingRequest && key.code == event::KeyCode::Char('e') {
+                    state = EditorState::Editing;
+                    state_change = true;
+                }
 
-            if key.code == event::KeyCode::Esc {
-                if app.currently_interacting == CurrentlyInteracting::RequestBody {
-                    app.currently_interacting = CurrentlyInteracting::SavedRequests;
-                    app.saved_list.enable();
+                if key.code == event::KeyCode::Esc {
+                    if state == EditorState::Editing {
+                        state = EditorState::SelectingRequest;
+                        state_change = true;
+                    } else if state == EditorState::SelectingRequest {
+                        state = EditorState::Unfocused;
+                        state_change = true;
+                    } else {
+                        return Ok(false);
+                    }
+                }
+                let length = saved_list.values.len();
+
+                if state_change {
+                    saved_list.values[length-4] = format!("State {state:?} ");
+                    editor_area.update_text_style(&state);
+                    saved_list.update_list(&state);
+                    debug_values.add("State".to_string(), format!("{state:?}"));
                     continue;
-                } else if app.currently_interacting == CurrentlyInteracting::SavedRequests {
-                    app.currently_interacting = CurrentlyInteracting::None;
-                    app.saved_list.disable();
-                    continue;
+                }
+
+                if state == EditorState::SelectingRequest {
+                    last_selected = saved_list.selected.clone();
+                    saved_list.handle_key(key);
+                    saved_list.update_list(&state);
+                } else if state == EditorState::Editing {
+                    editor_handle_input(&mut editor_area, &last_selected, key);
                 } else {
-                    return Ok(false);
                 }
-            } else if app.currently_interacting == CurrentlyInteracting::SavedRequests {
-                app.saved_list.enable();
-                app.saved_list.handle_key(key);
-            } else if app.currently_interacting == CurrentlyInteracting::RequestBody {
-                if key.code == event::KeyCode::Char('s')
-                    && key.modifiers.contains(KeyModifiers::CONTROL)
-                {
-                    update_saved_request(&last_selected, editor_area.get_current_content());
-                }
-                editor_area.area.input(key);
-            } else {
             }
-            last_selected = app.saved_list.selected.clone();
         }
+    }
+}
+
+fn editor_handle_input(editor_area: &mut EditorTextArea<'_>, last_selected: &String, key: event::KeyEvent) {
+    if key.code == event::KeyCode::Char('s')
+        && key.modifiers.contains(KeyModifiers::CONTROL)
+    {
+        update_saved_request(last_selected, editor_area.get_current_content());
+    }
+    else {
+        editor_area.area.input(key);
     }
 }

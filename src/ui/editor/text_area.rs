@@ -1,14 +1,9 @@
 use ratatui::{
-    style::{Color, Style},
-    text::Line,
-    widgets::{Block, BorderType, Borders, Padding},
+    layout::Alignment, style::{Color, Style}, text::Line, widgets::{Block, BorderType, Borders, Padding}
 };
 use tui_textarea::TextArea;
 
-use crate::{
-    app::CurrentlyInteracting,
-    file::read_saved_request,
-};
+use crate::{EditorState, file::read_saved_request};
 
 pub struct EditorTextArea<'a> {
     pub area: TextArea<'a>,
@@ -36,27 +31,24 @@ impl<'a> EditorTextArea<'a> {
 
         let mut a = TextArea::from(read_saved_request(path.to_string()).lines());
         a.set_block(block);
+        a.set_alignment(Alignment::Left);
 
         let res = EditorTextArea {
             area: a,
+
             style_enabled: Style::default().fg(Color::Gray),
-            style_line_number_enabled: Style::default()
-                .fg(Color::Gray),
-            style_cursor_body_enabled: Style::default()
-                .fg(Color::LightBlue),
+            style_line_number_enabled: Style::default().fg(Color::Gray),
+            style_cursor_body_enabled: Style::default().fg(Color::LightBlue),
 
             style_disabled: Style::default().fg(Color::DarkGray),
-            style_line_number_disabled: Style::default()
-                .fg(Color::DarkGray),
-
-            style_cursor_body_disabled: Style::default()
-                .fg(Color::DarkGray),
+            style_line_number_disabled: Style::default().fg(Color::DarkGray),
+            style_cursor_body_disabled: Style::default().fg(Color::DarkGray),
         };
         res
     }
 
-    pub fn update_text_style(&mut self, state: CurrentlyInteracting) {
-        if state == CurrentlyInteracting::RequestBody {
+    pub fn update_text_style(&mut self, state: &EditorState) {
+        if *state == EditorState::Editing {
             self.area.set_style(self.style_enabled);
             self.area
                 .set_line_number_style(self.style_line_number_enabled);
@@ -71,7 +63,7 @@ impl<'a> EditorTextArea<'a> {
         }
     }
 
-    pub fn get_current_content(&mut self) -> Vec<String>{
+    pub fn get_current_content(&mut self) -> Vec<String> {
         return self.area.clone().into_lines();
     }
 }

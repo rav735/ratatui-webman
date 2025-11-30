@@ -34,6 +34,13 @@ pub fn get_saved_requests() -> Vec<String> {
 
 pub fn read_saved_request(name: String) -> String {
     let path = SAVED_REQUEST_PATH.to_string() + &name;
+    if let Err(e) = File::open(&path){
+        return "Nothing to show.".to_string()
+    }
+    read_and_return_string(path)
+}
+
+fn read_and_return_string(path: String) -> String {
     let mut f = File::open(path).unwrap();
     let mut buffer = String::new();
 

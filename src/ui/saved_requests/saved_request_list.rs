@@ -1,25 +1,82 @@
-use crate::utils::create_list_with_styles;
 use ratatui::{
     crossterm::event::{KeyCode, KeyEvent, KeyEventKind},
-    style::{Color, Style},
-    widgets::{Borders, List},
+    style::{Color, Style, Styled},
+    text::{Line, Span},
+    widgets::{Block, BorderType, Borders, List, ListItem},
 };
+
+use crate::{EditorState, file::get_saved_requests};
 
 #[derive(Default)]
 pub struct SavedRequestList<'a> {
     pub values: Vec<String>,
-    pub ui_element: List<'a>,
-    pub disabled: bool,
+    pub list: List<'a>,
+    pub list_block: Block<'a>,
 
     pub selected: String,
     pub selected_index: usize,
 
-    pub selected_style: Style,
-    pub default_style: Style,
-    pub disabled_style: Style,
+    selected_style: Style,
+    default_style: Style,
+    disabled_style: Style,
 }
 
-impl SavedRequestList<'_> {
+impl<'a> SavedRequestList<'a> {
+    pub fn create_new() -> SavedRequestList<'a> {
+        let list_block = Block::default()
+            .borders(Borders::ALL)
+            .border_style(Color::Gray)
+            .border_type(BorderType::Rounded)
+            .style(Style::default())
+            .title(Line::from(" [1] - Saved Requests ").centered());
+
+        let list = List::default();
+        
+
+        let res = SavedRequestList {
+            values: get_saved_requests(),
+            list,
+            list_block,
+            selected: get_saved_requests()[0].clone(),
+            selected_index: 0,
+            selected_style: Style::new().bg(Color::Gray).fg(Color::Gray),
+            default_style: Style::new().fg(Color::Gray),
+            disabled_style: Style::new().fg(Color::DarkGray),
+        };
+        res
+    }
+
+    pub fn update_list(&mut self, state: &EditorState) {
+        let mut styles: Vec<Style> = vec![];
+        self.get_styles_based_on_state(&mut styles, *state);
+
+        let mut new_values: Vec<ListItem> = vec![];
+
+        for i in 0..self.values.len() {
+                new_values.push(ListItem::new(Line::from(Span::styled(
+                self.values[i].to_string(),
+                styles[i],
+            ))));
+        }
+
+        self.list = List::new(new_values).block(self.list_block.clone());
+    }
+
+    fn get_styles_based_on_state(&mut self, styles: &mut Vec<Style>, state: EditorState) {
+        for sr in self.values.clone() {
+            if sr == self.values.get(self.selected_index).unwrap().clone() {
+                styles.push(self.selected_style);
+                self.selected = sr;
+            }
+
+            if state == EditorState::SelectingRequest {
+                styles.push(self.default_style);
+            } else {
+                styles.push(self.disabled_style);
+            }
+        }
+    }
+
     pub fn handle_key(&mut self, key: KeyEvent) {
         if key.kind != KeyEventKind::Press {
             return;
@@ -35,13 +92,6 @@ impl SavedRequestList<'_> {
             // }
             _ => {}
         }
-    }
-
-    pub fn enable(&mut self) {
-        self.disabled = false;
-    }
-    pub fn disable(&mut self) {
-        self.disabled = true;
     }
 
     fn select_next(&mut self) {
@@ -61,29 +111,5 @@ impl SavedRequestList<'_> {
     }
     fn select_last(&mut self) {
         self.selected_index = self.values.len() - 1;
-    }
-
-    pub fn create_saved_list<'a>(&mut self) -> List<'a> {
-        let mut styles: Vec<Style> = vec![];
-        for sr in self.values.clone() {
-            if sr == self.values.get(self.selected_index).unwrap().clone() {
-                styles.push(self.selected_style);
-                self.selected = sr;
-            } else if self.disabled {
-                styles.push(self.disabled_style);
-                continue;
-            } else {
-                styles.push(self.default_style);
-            }
-        }
-
-        let list = create_list_with_styles(
-            " [1] - Saved Requests ".to_string(),
-            self.values.clone(),
-            styles,
-            Color::Gray,
-            Borders::ALL,
-        );
-        list
     }
 }

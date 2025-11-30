@@ -1,30 +1,31 @@
 use ratatui::{
     Frame,
     layout::{Constraint, Direction, Layout},
+    widgets::List,
 };
 use tui_textarea::TextArea;
 
 // General
-use crate::app::App;
+use crate::{EditorState, ui::{debug::create_debuger_panel, editor::create_editor, hotkeys::create_hotkey_list}, utils::DebugValues};
 
-use crate::ui::{editor::create_editor, hotkeys::create_hotkey_list};
-
-pub fn ui(frame: &mut Frame, app: &mut App, area: &TextArea) {
+pub fn ui(frame: &mut Frame, request_list: &List, area: &TextArea, db : &DebugValues) {
     // Create the layout sections.
     let layout = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([
-            Constraint::Length(50),
+            Constraint::Length(35),
             Constraint::Length(30),
-            Constraint::Percentage(70),
+            Constraint::Percentage(35),
+            Constraint::Percentage(35)
         ])
         .split(frame.area());
 
-    app.update_saved_list();
-    frame.render_widget(app.saved_list.ui_element.clone(), layout[0]);
-
+    frame.render_widget(request_list, layout[0]);
     create_editor(frame, layout[2], area);
 
     let hotkey_list = create_hotkey_list();
     frame.render_widget(hotkey_list, layout[1]);
+
+    
+    frame.render_widget(db.create_debuger_panel(), layout[3]);
 }
