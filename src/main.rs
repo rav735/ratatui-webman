@@ -81,11 +81,11 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
         
         terminal.draw(|f| ui(f, &saved_list.list, &editor_area.area, &debug_values))?;
         if last_selected != saved_list.selected{
+            debug_values.add("Last".to_string(), last_selected.to_string());
+            debug_values.add("Selected".to_string(), saved_list.selected.to_string());
             editor_area = EditorTextArea::create_new(&saved_list.selected);
             editor_area.update_text_style(&state);
             last_selected = saved_list.selected.clone();
-            debug_values.add("Last".to_string(), last_selected.to_string());
-            debug_values.add("Selected".to_string(), saved_list.selected.to_string());
         }
 
         if let Event::Key(key) = event::read()? {
