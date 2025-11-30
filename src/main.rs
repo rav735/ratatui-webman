@@ -117,10 +117,8 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
                         return Ok(false);
                     }
                 }
-                let length = saved_list.values.len();
 
                 if state_change {
-                    saved_list.values[length-4] = format!("State {state:?} ");
                     editor_area.update_text_style(&state);
                     saved_list.update_list(&state);
                     debug_values.add("State".to_string(), format!("{state:?}"));
