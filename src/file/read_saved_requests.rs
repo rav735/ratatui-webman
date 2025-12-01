@@ -34,8 +34,8 @@ pub fn get_saved_requests() -> Vec<String> {
 
 pub fn read_saved_request(name: String) -> String {
     let path = SAVED_REQUEST_PATH.to_string() + &name;
-    if let Err(_e) = File::open(&path){
-        return "Nothing to show.".to_string()
+    if let Err(_e) = File::open(&path) {
+        return "Nothing to show.".to_string();
     }
     read_and_return_string(path)
 }

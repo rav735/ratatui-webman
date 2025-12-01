@@ -1,6 +1,6 @@
 use ratatui::{
     style::{Color, Style},
-    text::{Line, Span},
+    text::{Line, Text},
     widgets::{Block, BorderType, Borders, List, ListItem},
 };
 
@@ -30,6 +30,6 @@ pub fn create_list(
 }
 
 fn create_list_item(text: String, color: Color) -> ListItem<'static> {
-    let current_screen = ListItem::new(Line::from(Span::styled(text, Style::default().fg(color))));
+    let current_screen = ListItem::new(Text::styled(text, Style::default().fg(color)));
     current_screen
 }

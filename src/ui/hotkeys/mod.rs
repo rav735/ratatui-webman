@@ -1,3 +1,3 @@
-mod list;
+mod hotkeys;
 
-pub use list::create_hotkey_list;
+pub use hotkeys::Hotkeys;

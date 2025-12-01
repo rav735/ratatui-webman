@@ -1,5 +1,8 @@
 use ratatui::{
-    layout::Alignment, style::{Color, Style}, text::Line, widgets::{Block, BorderType, Borders, Padding}
+    layout::Alignment,
+    style::{Color, Style},
+    text::Line,
+    widgets::{Block, BorderType, Borders, Padding},
 };
 use tui_textarea::TextArea;
 

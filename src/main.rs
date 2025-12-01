@@ -20,7 +20,8 @@ mod utils;
 use crate::{
     app::{App, CurrentScreen},
     file::update_saved_request,
-    ui::{editor::EditorTextArea, saved_requests::SavedRequestList, ui::ui}, utils::DebugValues,
+    ui::{editor::EditorTextArea, hotkeys::Hotkeys, saved_requests::SavedRequestList, ui::ui},
+    utils::Debugger,
 };
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -63,26 +64,59 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<bool> {
     let mut state: EditorState = EditorState::SelectingRequest;
+    let hotkeys: &mut Hotkeys = &mut Hotkeys::create_new();
+
     let mut saved_list = SavedRequestList::create_new();
     saved_list.update_list(&state);
+
     let mut editor_area = EditorTextArea::create_new(&saved_list.selected);
 
     let mut last_selected = saved_list.selected.clone();
 
-    let mut debug_values = DebugValues::create_new();
-    
+    let mut debug_values = Debugger::create_new();
+
     saved_list.update_list(&state);
     editor_area.update_text_style(&state);
-    debug_values.add("State".to_string(), format!("{state:?}"));
-    debug_values.add("Last".to_string(), last_selected.to_string());
-    debug_values.add("Selected".to_string(), saved_list.selected.to_string());
+    debug_values.add(
+        &"Runtime".to_string(),
+        &"state".to_string(),
+        &format!("{state:?}"),
+    );
+    debug_values.add(
+        &"Editor".to_string(),
+        &"last_selected".to_string(),
+        &last_selected.to_string(),
+    );
+    debug_values.add(
+        &"Editor".to_string(),
+        &"saved_list.selected".to_string(),
+        &saved_list.selected.to_string(),
+    );
     loop {
-
-        
-        terminal.draw(|f| ui(f, &saved_list.list, &editor_area.area, &debug_values))?;
-        if last_selected != saved_list.selected{
-            debug_values.add("Last".to_string(), last_selected.to_string());
-            debug_values.add("Selected".to_string(), saved_list.selected.to_string());
+        terminal.draw(|f| ui(f, &saved_list, &editor_area, hotkeys, &debug_values))?;
+        for mut hk in hotkeys.values.clone() {
+            debug_values.add(
+                &"Hotkeys".to_string(),
+                &hk.name.clone(),
+                &hk.to_string_pretty(),
+            );
+        }
+        debug_values.add(
+            &"Runtime".to_string(),
+            &"state".to_string(),
+            &format!("{:?}", &state.clone()),
+        );
+        if last_selected != saved_list.selected {
+            debug_values.add(
+                &"Editor".to_string(),
+                &"last_selected".to_string(),
+                &last_selected.to_string(),
+            );
+            debug_values.add(
+                &"Editor".to_string(),
+                &"saved_list.selected".to_string(),
+                &saved_list.selected.to_string(),
+            );
             editor_area = EditorTextArea::create_new(&saved_list.selected);
             editor_area.update_text_style(&state);
             last_selected = saved_list.selected.clone();
@@ -99,11 +133,21 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
                 if state == EditorState::Unfocused && key.code == event::KeyCode::Char('1') {
                     state = EditorState::SelectingRequest;
                     state_change = true;
+                    debug_values.add(
+                        &"Runtime".to_string(),
+                        &"Last Category Shortcut".to_string(),
+                        &key.code.to_string(),
+                    );
                 }
 
                 if state == EditorState::SelectingRequest && key.code == event::KeyCode::Char('e') {
                     state = EditorState::Editing;
                     state_change = true;
+                    debug_values.add(
+                        &"Runtime".to_string(),
+                        &"Last Category Shortcut".to_string(),
+                        &key.code.to_string(),
+                    );
                 }
 
                 if key.code == event::KeyCode::Esc {
@@ -119,9 +163,9 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
                 }
 
                 if state_change {
+                    hotkeys.check_for_hotkey_input(key.code);
                     editor_area.update_text_style(&state);
                     saved_list.update_list(&state);
-                    debug_values.add("State".to_string(), format!("{state:?}"));
                     continue;
                 }
 
@@ -138,13 +182,14 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
     }
 }
 
-fn editor_handle_input(editor_area: &mut EditorTextArea<'_>, last_selected: &String, key: event::KeyEvent) {
-    if key.code == event::KeyCode::Char('s')
-        && key.modifiers.contains(KeyModifiers::CONTROL)
-    {
+fn editor_handle_input(
+    editor_area: &mut EditorTextArea<'_>,
+    last_selected: &String,
+    key: event::KeyEvent,
+) {
+    if key.code == event::KeyCode::Char('s') && key.modifiers.contains(KeyModifiers::CONTROL) {
         update_saved_request(last_selected, editor_area.get_current_content());
-    }
-    else {
+    } else {
         editor_area.area.input(key);
     }
 }

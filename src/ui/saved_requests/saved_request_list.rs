@@ -16,9 +16,9 @@ pub struct SavedRequestList<'a> {
     pub selected: String,
     pub selected_index: usize,
 
-    selected_style: Style,
+    _selected_style: Style,
     default_style: Style,
-    disabled_style: Style,
+    _disabled_style: Style,
 }
 
 impl<'a> SavedRequestList<'a> {
@@ -31,7 +31,6 @@ impl<'a> SavedRequestList<'a> {
             .title(Line::from(" [1] - Saved Requests ").centered());
 
         let list = List::default();
-        
 
         let res = SavedRequestList {
             values: get_saved_requests(),
@@ -39,40 +38,39 @@ impl<'a> SavedRequestList<'a> {
             list_block,
             selected: get_saved_requests()[0].clone(),
             selected_index: 0,
-            selected_style: Style::new().bg(Color::Gray).fg(Color::Gray),
+            _selected_style: Style::new().bg(Color::Gray).fg(Color::Gray),
             default_style: Style::new().fg(Color::Gray),
-            disabled_style: Style::new().fg(Color::DarkGray),
+            _disabled_style: Style::new().fg(Color::DarkGray),
         };
         res
     }
 
     pub fn update_list(&mut self, state: &EditorState) {
-        let mut styles: Vec<Style> = vec![];
-        self.get_styles_based_on_state(&mut styles, *state);
+        let mut prefixes: Vec<String> = vec![];
+        self.get_styles_based_on_state(&mut prefixes, *state);
 
         let mut new_values: Vec<ListItem> = vec![];
 
         for i in 0..self.values.len() {
-                new_values.push(ListItem::new(Line::from(Span::styled(
-                self.values[i].to_string(),
-                styles[i],
+            new_values.push(ListItem::new(Line::from(Span::styled(
+                prefixes[i].clone() + &self.values[i].to_string(), self.default_style
             ))));
         }
 
         self.list = List::new(new_values).block(self.list_block.clone());
     }
 
-    fn get_styles_based_on_state(&mut self, styles: &mut Vec<Style>, state: EditorState) {
+    fn get_styles_based_on_state(&mut self, prefixes: &mut Vec<String>, state: EditorState) {
         for sr in self.values.clone() {
             if sr == self.values.get(self.selected_index).unwrap().clone() {
-                styles.push(self.selected_style);
+                prefixes.push(">> ".to_string());
                 self.selected = sr;
             }
 
             if state == EditorState::SelectingRequest {
-                styles.push(self.default_style);
+                prefixes.push("".to_string());
             } else {
-                styles.push(self.disabled_style);
+                prefixes.push("-".to_string());
             }
         }
     }
