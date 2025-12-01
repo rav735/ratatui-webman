@@ -1,6 +1,6 @@
 mod editor;
 mod header;
-mod history;
+mod request_history;
 mod text_area;
 
 pub use editor::create_editor;

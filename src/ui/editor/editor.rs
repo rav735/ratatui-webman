@@ -1,4 +1,6 @@
-use crate::ui::editor::{header::create_editor_header, history::create_editor_history_list};
+use crate::ui::editor::{
+    header::create_editor_header, request_history::create_editor_history_list,
+};
 use ratatui::{
     Frame,
     layout::{Constraint, Direction, Layout, Rect},

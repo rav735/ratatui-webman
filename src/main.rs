@@ -3,16 +3,19 @@ use ratatui::{
     Terminal,
     backend::{Backend, CrosstermBackend},
     crossterm::{
-        event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyModifiers}, execute, terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode}
+        event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyModifiers},
+        execute,
+        terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
     },
 };
-use tui_textarea::CursorMove;
 use std::{error::Error, io};
+use tui_textarea::CursorMove;
 
 // General
 mod app;
 mod file;
 mod ui;
+
 
 //  UI - Elements
 mod utils;
@@ -95,7 +98,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
         &saved_list.selected.to_string(),
         false,
     );
-    let mut last_pos: (usize, usize) = (0,0);
+    let mut last_pos: (usize, usize) = (0, 0);
     loop {
         terminal.draw(|f| ui(f, &saved_list, &editor_area, hotkeys, &debugger))?;
         for mut hk in hotkeys.values.clone() {
@@ -184,14 +187,17 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
                     saved_list.handle_key(key);
                     saved_list.update_list(&state);
                 } else if state == EditorState::Editing {
-                    last_pos = editor_handle_input(&mut editor_area, &last_selected, key, &mut debugger, last_pos);
+                    last_pos = editor_handle_input(
+                        &mut editor_area,
+                        &last_selected,
+                        key,
+                        &mut debugger,
+                        last_pos,
+                    );
                     debugger.add(
                         &"Editing".to_string(),
                         &"Last Cursor Position".to_string(),
-                        &format!(
-                            "{:?}",
-                            last_pos
-                        ),
+                        &format!("{:?}", last_pos),
                         false,
                     );
                 } else {
@@ -206,7 +212,7 @@ fn editor_handle_input(
     last_selected: &String,
     key: event::KeyEvent,
     debugger: &mut Debugger,
-    last_position: (usize, usize)
+    last_position: (usize, usize),
 ) -> (usize, usize) {
     if key.code == event::KeyCode::Char('s') && key.modifiers.contains(KeyModifiers::CONTROL) {
         update_saved_request(last_selected, editor_area.get_current_content());
@@ -220,20 +226,17 @@ fn editor_handle_input(
             ),
             false,
         );
-        return last_position
+        return last_position;
     } else {
         let cursor: (usize, usize) = editor_area.area.cursor();
 
-        if last_position.0 != cursor.0 { //? Filter move keys?
+        if last_position.0 != cursor.0 {
+            //? Filter move keys?
             let yanked = yank_current_line(editor_area, cursor);
             debugger.add(
                 &"Editing".to_string(),
                 &"Old Line".to_string(),
-                &format!(
-                    "{}: {:?}",
-                    cursor.0,
-                    yanked
-                ),
+                &format!("{}: {:?}", cursor.0, yanked),
                 false,
             );
         }
@@ -242,11 +245,7 @@ fn editor_handle_input(
             debugger.add(
                 &"Editing".to_string(),
                 &"New Line".to_string(),
-                &format!(
-                    "{}: {:?}",
-                    cursor.0,
-                    yanked
-                ),
+                &format!("{}: {:?}", cursor.0, yanked),
                 false,
             );
         }
@@ -259,7 +258,9 @@ fn yank_current_line(editor_area: &mut EditorTextArea<'_>, cursor: (usize, usize
     editor_area.area.start_selection();
     editor_area.area.move_cursor(CursorMove::End);
     editor_area.area.copy();
-    editor_area.area.move_cursor(CursorMove::Jump(cursor.0 as u16, cursor.1 as u16));
+    editor_area
+        .area
+        .move_cursor(CursorMove::Jump(cursor.0 as u16, cursor.1 as u16));
     let res = editor_area.area.yank_text();
     editor_area.area.cancel_selection();
     res
