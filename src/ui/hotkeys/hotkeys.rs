@@ -4,9 +4,7 @@ use ratatui::{
     text::{Line, Span},
     widgets::{Block, BorderType, Borders, List, ListItem},
 };
-use std::
-    collections::HashMap
-;
+use std::collections::HashMap;
 
 #[derive(PartialEq, Clone)]
 pub struct Hotkey {
@@ -33,7 +31,7 @@ impl Hotkey {
     }
 
     pub fn to_string_pretty(&mut self) -> String {
-        serde_json::to_string_pretty(&self.as_array()).unwrap()
+        "\n".to_string() + &serde_json::to_string_pretty(&self.as_array()).unwrap()
     }
 }
 
@@ -45,7 +43,7 @@ pub struct Hotkeys {
 
 impl Hotkeys {
     pub fn create_new() -> Hotkeys {
-        let mut hotkeys =Hotkeys {
+        let mut hotkeys = Hotkeys {
             values: vec![],
             default_style: Style::default().fg(Color::Gray),
             clicked_style: Style::default().fg(Color::DarkGray).bg(Color::Gray),
@@ -54,13 +52,13 @@ impl Hotkeys {
         hotkeys.add(
             "1".to_string(),
             "Select Request".to_string(),
-            "Hotkeys".to_string(),
+            "Change View".to_string(),
         );
 
         hotkeys.add(
             "e".to_string(),
             "Edit Request".to_string(),
-            "Hotkeys".to_string(),
+            "Change View".to_string(),
         );
         hotkeys
     }

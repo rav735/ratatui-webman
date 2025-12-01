@@ -33,18 +33,21 @@ impl Debugger {
     pub fn create_new() -> Debugger {
         Debugger {
             values: vec![],
-            style: Style::default().fg(Color::LightCyan),
+            style: Style::default().fg(Color::DarkGray),
         }
     }
 
-    pub fn add(&mut self, category: &String, name: &String, value: &String) {
-        let hotkey: DebugValue = DebugValue {
+    pub fn add(&mut self, category: &String, name: &String, value: &String, multiline: bool) {
+        let mut hotkey: DebugValue = DebugValue {
             category: category.to_string(),
             name: name.to_string(),
             value: value.to_string(),
             style: (self.style),
             message: format!("[{}] - {}", name, value),
         };
+        if multiline {
+            hotkey.message = format!("[{}]{}", name, value)
+        }
         if self.exists(&hotkey) {
             let index = self
                 .values
@@ -77,16 +80,21 @@ impl Debugger {
         let length: i16 = dbg_lines.keys().len().try_into().unwrap();
         let mut sub_length: u16 = 0;
         dbg_lines.keys().sorted().for_each(|k| {
-            dbg_lines.get(k).unwrap().iter().sorted().for_each(|message| {
-                sub_length = sub_length + u16::try_from(message.lines().count()).ok().unwrap();
-            });
-            con.push(Constraint::Length(sub_length+1));
+            dbg_lines
+                .get(k)
+                .unwrap()
+                .iter()
+                .sorted()
+                .for_each(|message| {
+                    sub_length = sub_length + u16::try_from(message.lines().count()).ok().unwrap();
+                });
+            con.push(Constraint::Length(sub_length + 1));
         });
 
         let list_block = Block::default()
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
-            .border_style(Color::Cyan)
+            .border_style(Color::LightCyan)
             .style(Style::default())
             .title(Line::from(" Debugger ".to_string()).centered());
 
@@ -135,9 +143,14 @@ fn get_debugger_block(title: String) -> Block<'static> {
     return Block::default()
         .borders(Borders::TOP)
         .border_type(BorderType::Plain)
-        .border_style(Color::LightCyan)
+        .border_style(Color::Blue)
         .style(Style::default())
         .title(Line::from(title).centered())
         .title_alignment(Alignment::Center)
-        .padding(Padding { left: 1, right: 0, top: 0, bottom: 0 });
+        .padding(Padding {
+            left: 1,
+            right: 1,
+            top: 0,
+            bottom: 0,
+        });
 }

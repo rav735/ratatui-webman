@@ -16,9 +16,9 @@ pub struct SavedRequestList<'a> {
     pub selected: String,
     pub selected_index: usize,
 
-    _selected_style: Style,
+    selected_style: Style,
     default_style: Style,
-    _disabled_style: Style,
+    disabled_style: Style,
 }
 
 impl<'a> SavedRequestList<'a> {
@@ -38,9 +38,9 @@ impl<'a> SavedRequestList<'a> {
             list_block,
             selected: get_saved_requests()[0].clone(),
             selected_index: 0,
-            _selected_style: Style::new().bg(Color::Gray).fg(Color::Gray),
+            selected_style: Style::new().bg(Color::Gray).fg(Color::Black),
             default_style: Style::new().fg(Color::Gray),
-            _disabled_style: Style::new().fg(Color::DarkGray),
+            disabled_style: Style::new().fg(Color::DarkGray),
         };
         res
     }
@@ -52,9 +52,22 @@ impl<'a> SavedRequestList<'a> {
         let mut new_values: Vec<ListItem> = vec![];
 
         for i in 0..self.values.len() {
-            new_values.push(ListItem::new(Line::from(Span::styled(
-                prefixes[i].clone() + &self.values[i].to_string(), self.default_style
-            ))));
+            if prefixes[i] == ">> " {
+                new_values.push(ListItem::new(Line::from(Span::styled(
+                    prefixes[i].clone() + &self.values[i].to_string(),
+                    self.selected_style,
+                ))));
+            } else if prefixes[i] == "- " {
+                new_values.push(ListItem::new(Line::from(Span::styled(
+                    prefixes[i].clone() + &self.values[i].to_string(),
+                    self.disabled_style,
+                ))));
+            } else {
+                new_values.push(ListItem::new(Line::from(Span::styled(
+                    prefixes[i].clone() + &self.values[i].to_string(),
+                    self.default_style,
+                ))));
+            }
         }
 
         self.list = List::new(new_values).block(self.list_block.clone());
@@ -70,7 +83,7 @@ impl<'a> SavedRequestList<'a> {
             if state == EditorState::SelectingRequest {
                 prefixes.push("".to_string());
             } else {
-                prefixes.push("-".to_string());
+                prefixes.push("- ".to_string());
             }
         }
     }
