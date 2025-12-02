@@ -1,11 +1,10 @@
-use chrono::{DateTime, DurationRound, TimeDelta, Utc};
+use chrono::{DateTime, TimeDelta, Utc};
 use ratatui::{
-    crossterm::event::KeyCode,
     style::{Color, Style},
     text::{Line, Span},
     widgets::{Block, BorderType, Borders, List, ListItem},
 };
-use std::{collections::HashMap, vec};
+use std::vec;
 
 #[derive(PartialEq, Clone)]
 pub struct Hotkey {
@@ -13,7 +12,6 @@ pub struct Hotkey {
     pub name: String,
     pub hotkey: String,
     pub message: String,
-    pub key_code: KeyCode,
     pub style: Style,
     pub style_frames_left: DateTime<Utc>,
 }
@@ -65,13 +63,22 @@ impl Hotkeys {
         hotkeys
     }
 
+    // pub fn rm(&mut self, hotkey: String) {
+    //     let c = match self.values.iter().position(|v| v.hotkey == hotkey) {
+    //         Some(c) => c,
+    //         None => 9999,
+    //     };
+    //     if c != 9999 {
+    //         self.values.remove(c);
+    //     }
+    // }
+
     pub fn add(&mut self, hotkey: String, name: String, category: String) {
         let hotkey: Hotkey = Hotkey {
             category: category,
             name: name.clone(),
             hotkey: hotkey.clone(),
             message: format!("[{}] - {}", hotkey, name),
-            key_code: KeyCode::Char(hotkey.chars().nth(0).unwrap()),
             style: self.default_style,
             style_frames_left: Utc::now(),
         };
@@ -88,8 +95,6 @@ impl Hotkeys {
     }
 
     pub fn create_hotkeys_panel<'a>(&mut self) -> List<'a> {
-        let mut hk_lines: Vec<String> = vec![];
-
         let list_block = Block::default()
             .borders(Borders::TOP | Borders::RIGHT | Borders::BOTTOM)
             .border_type(BorderType::Rounded)
@@ -114,10 +119,10 @@ impl Hotkeys {
         list
     }
 
-    pub fn check_for_hotkey_input(&mut self, key: KeyCode) {
+    pub fn check_for_hotkey_input(&mut self, key: &String) {
         self.values
             .iter()
-            .position(|v| v.key_code == key)
+            .position(|v| v.hotkey == key.to_string())
             .and_then(|index| {
                 let mut old = self.values[index].clone();
                 old.update_style(self.clicked_style);

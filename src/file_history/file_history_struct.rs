@@ -1,7 +1,5 @@
 use std::{collections::HashMap, usize};
-
 use chrono::Utc;
-use serde::Serialize;
 
 const SAVED_REQUEST_PATH: &str = "./saved_requests/";
 
@@ -31,10 +29,7 @@ impl FileHistory {
             saved: false,
         }
     }
-
-    pub fn add_edits(&mut self, row: usize, old: String, new: String) {
-        self.changes.insert(row, (old, new));
-    }
+    
     pub fn set_old_row(&mut self, row: usize, old: String) {
         self.changes.insert(row, (old, "".to_string()));
     }
@@ -55,5 +50,4 @@ impl FileHistory {
     pub fn to_string_pretty(&mut self) -> String {
         "\n".to_string() + &serde_json::to_string_pretty(&self.as_array()).unwrap()
     }
-
 }

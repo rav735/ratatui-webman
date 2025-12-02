@@ -31,6 +31,7 @@ pub struct Debugger {
     pub values: Vec<DebugValue>,
     pub categories: Vec<String>,
     pub style: Style,
+    pub panel_enabled: bool,
 }
 
 impl Debugger {
@@ -39,6 +40,7 @@ impl Debugger {
             values: vec![],
             style: Style::default().fg(Color::DarkGray),
             categories: vec![],
+            panel_enabled: false,
         }
     }
 
@@ -83,7 +85,9 @@ impl Debugger {
         self.values
             .iter_mut()
             .filter(|v| v.category == cat)
-            .for_each(|v| v.disabled = !v.disabled);
+            .for_each(|panel| {
+                panel.disabled = !panel.disabled;
+            });
     }
 
     pub fn create_debugger_panel<'a>(&self, frame: &mut Frame, rec: Rect) {

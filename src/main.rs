@@ -68,7 +68,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<bool> {
     let mut state: EditorState = EditorState::SelectingRequest;
-    let hotkeys: &mut Hotkeys = &mut Hotkeys::create_new();
 
     let mut saved_list = SavedRequestList::create_new();
     saved_list.update_list(&state);
@@ -102,18 +101,34 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
     );
     let mut last_pos: (usize, usize) = (0, 0);
 
-    let mut last_enabled_category : String = "".to_string();
-    let mut last_input : String =  "".to_string();
+    let mut last_enabled_category: String = "".to_string();
+    let mut last_input: String = "".to_string();
+    let hotkeys: &mut Hotkeys = &mut Hotkeys::create_new();
+
+    hotkeys.add(
+        "F12".to_string(),
+        "Toggle Debugger".to_string(),
+        "Debugger".to_string(),
+    );
     loop {
-            debugger.add(
-                &"Editing".to_string(),
-                &"FileTracker".to_string(),
-                &file_tracker.to_string_pretty(),
-                true,
-            );
+        debugger.add(
+            &"Editing".to_string(),
+            &"FileTracker".to_string(),
+            &file_tracker.to_string_pretty(),
+            true,
+        );
         terminal.draw(|f| ui(f, &saved_list, &editor_area, hotkeys, &debugger))?;
-        let dbg_panel_count = hotkeys.values.iter().filter(|v| v.name.contains("Debug:")).count();
-        debugger.add(&"Runtime".to_string(), &"Dbg Category Count".to_string(), &dbg_panel_count.to_string(), false);
+        let dbg_panel_count = hotkeys
+            .values
+            .iter()
+            .filter(|v| v.name.contains("Debug:"))
+            .count();
+        debugger.add(
+            &"Runtime".to_string(),
+            &"Dbg Category Count".to_string(),
+            &dbg_panel_count.to_string(),
+            false,
+        );
         for mut hk in hotkeys.values.clone() {
             debugger.add(
                 &"Hotkeys".to_string(),
@@ -146,8 +161,18 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
             last_selected = saved_list.selected.clone();
             file_tracker = FileHistory::create_new(saved_list.selected.to_string());
         }
-        debugger.add(&"Runtime".to_string(), &"Last Enabled Category".to_string(), &last_enabled_category.to_string(), false);
-        debugger.add(&"Runtime".to_string(), &"Last Input".to_string(), &last_input.to_string(), false);
+        debugger.add(
+            &"Runtime".to_string(),
+            &"Last Enabled Category".to_string(),
+            &last_enabled_category.to_string(),
+            false,
+        );
+        debugger.add(
+            &"Runtime".to_string(),
+            &"Last Input".to_string(),
+            &last_input.to_string(),
+            false,
+        );
 
         if let Event::Key(key) = event::read()? {
             if key.kind == event::KeyEventKind::Release {
@@ -155,10 +180,24 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
                 continue;
             }
             last_input = key.code.to_string();
+            hotkeys.check_for_hotkey_input(&last_input);
 
-            if last_input.contains("F") && last_input.len() == 2{
-                let cat = 
-                    hotkeys
+            if last_input.contains("F")
+                && last_input.len() <= 3
+                && (last_input
+                    .replace("F", "")
+                    .chars()
+                    .nth(0)
+                    .unwrap()
+                    .to_digit(10)
+                    .unwrap() as usize
+                    <= dbg_panel_count
+                    || last_input == "F12")
+            {
+                if last_input == "F12" {
+                    debugger.panel_enabled = !debugger.panel_enabled
+                } else {
+                    let cat = hotkeys
                         .values
                         .iter()
                         .filter(|hk| hk.hotkey == key.code.to_string())
@@ -167,12 +206,10 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
                         .name
                         .replace("Debug: ", "")
                         .clone();
-                debugger.enable_category(
-                    cat.clone(),
-                );
-                last_enabled_category = cat;
+                    debugger.enable_category(cat.clone());
+                    last_enabled_category = cat;
+                }
             }
-
 
             if app.current_screen == CurrentScreen::Main {
                 let mut state_change = false;
@@ -211,7 +248,6 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
                 }
 
                 if state_change {
-                    hotkeys.check_for_hotkey_input(key.code);
                     editor_area.update_text_style(&state);
                     saved_list.update_list(&state);
                     continue;
