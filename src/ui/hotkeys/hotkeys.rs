@@ -1,10 +1,11 @@
+use chrono::{DateTime, DurationRound, TimeDelta, Utc};
 use ratatui::{
     crossterm::event::KeyCode,
     style::{Color, Style},
     text::{Line, Span},
     widgets::{Block, BorderType, Borders, List, ListItem},
 };
-use std::collections::HashMap;
+use std::{collections::HashMap, vec};
 
 #[derive(PartialEq, Clone)]
 pub struct Hotkey {
@@ -14,6 +15,7 @@ pub struct Hotkey {
     pub message: String,
     pub key_code: KeyCode,
     pub style: Style,
+    pub style_frames_left: DateTime<Utc>,
 }
 
 impl Hotkey {
@@ -50,7 +52,7 @@ impl Hotkeys {
         };
 
         hotkeys.add(
-            "1".to_string(),
+            "s".to_string(),
             "Select Request".to_string(),
             "Change View".to_string(),
         );
@@ -71,6 +73,7 @@ impl Hotkeys {
             message: format!("[{}] - {}", hotkey, name),
             key_code: KeyCode::Char(hotkey.chars().nth(0).unwrap()),
             style: self.default_style,
+            style_frames_left: Utc::now(),
         };
         if self.exists(&hotkey) {
         } else {
@@ -85,13 +88,7 @@ impl Hotkeys {
     }
 
     pub fn create_hotkeys_panel<'a>(&mut self) -> List<'a> {
-        let mut hk_lines: HashMap<Style, Vec<String>> = HashMap::new();
-        hk_lines.insert(self.clicked_style, vec![]);
-        hk_lines.insert(self.default_style, vec![]);
-
-        for hk in self.values.clone() {
-            hk_lines.get_mut(&hk.style).unwrap().push(hk.message);
-        }
+        let mut hk_lines: Vec<String> = vec![];
 
         let list_block = Block::default()
             .borders(Borders::TOP | Borders::RIGHT | Borders::BOTTOM)
@@ -102,18 +99,15 @@ impl Hotkeys {
 
         let mut list_items = Vec::<ListItem>::new();
 
-        for (style, messages) in hk_lines.iter_mut() {
-            messages.sort();
-            for message in messages {
-                list_items.push(ListItem::new(Line::from(Span::styled(
-                    message.to_string(),
-                    *style,
-                ))));
-            }
+        for hk in self.values.clone() {
+            list_items.push(ListItem::new(Line::from(Span::styled(
+                hk.message, hk.style,
+            ))));
         }
 
         self.values
             .iter_mut()
+            .filter(|v| v.style_frames_left.timestamp_millis() > Utc::now().timestamp_millis())
             .for_each(|hk| hk.style = self.default_style);
 
         let list = List::new(list_items).block(list_block);
@@ -127,6 +121,9 @@ impl Hotkeys {
             .and_then(|index| {
                 let mut old = self.values[index].clone();
                 old.update_style(self.clicked_style);
+                old.style_frames_left = Utc::now()
+                    .checked_add_signed(TimeDelta::milliseconds(500))
+                    .unwrap();
                 self.values[index] = old;
                 Some(0)
             });

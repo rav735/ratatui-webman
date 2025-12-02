@@ -9,6 +9,8 @@ use ratatui::{
     widgets::{Block, BorderType, Borders, List, ListItem, Padding},
 };
 
+//? Search for name with F12 + Input?
+
 #[derive(PartialEq, Clone)]
 pub struct DebugValue {
     pub category: String,
@@ -16,6 +18,7 @@ pub struct DebugValue {
     pub value: String,
     pub style: Style,
     pub message: String,
+    pub disabled: bool,
 }
 
 impl DebugValue {
@@ -26,6 +29,7 @@ impl DebugValue {
 
 pub struct Debugger {
     pub values: Vec<DebugValue>,
+    pub categories: Vec<String>,
     pub style: Style,
 }
 
@@ -34,6 +38,7 @@ impl Debugger {
         Debugger {
             values: vec![],
             style: Style::default().fg(Color::DarkGray),
+            categories: vec![],
         }
     }
 
@@ -44,6 +49,7 @@ impl Debugger {
             value: value.to_string(),
             style: (self.style),
             message: format!("[{}] - {}", name, value),
+            disabled: false,
         };
         if multiline {
             hotkey.message = format!("[{}]{}", name, value)
@@ -61,12 +67,23 @@ impl Debugger {
         } else {
             self.values.push(hotkey);
         }
+
+        if !self.categories.contains(category) {
+            self.categories.push(category.clone());
+        }
     }
 
-    fn exists(&self, new_hk: &DebugValue) -> bool {
+    fn exists(&self, new_dbv: &DebugValue) -> bool {
         self.values
             .iter()
-            .any(|hk| hk.name == new_hk.name && hk.category == new_hk.category)
+            .any(|hk| hk.name == new_dbv.name && hk.category == new_dbv.category)
+    }
+
+    pub fn enable_category(&mut self, cat: String) {
+        self.values
+            .iter_mut()
+            .filter(|v| v.category == cat)
+            .for_each(|v| v.disabled = !v.disabled);
     }
 
     pub fn create_debugger_panel<'a>(&self, frame: &mut Frame, rec: Rect) {
@@ -127,6 +144,9 @@ impl Debugger {
 
     fn add_debugging_lines(&self, dbg_lines: &mut HashMap<String, Vec<String>>) {
         for debug_value in self.values.clone() {
+            if debug_value.disabled {
+                continue;
+            }
             if dbg_lines.contains_key(&debug_value.category) {
                 dbg_lines
                     .get_mut(&debug_value.category)
